@@ -234,7 +234,7 @@ async def on_raw_reaction_add(payload):
         discord.PartialEmoji(name='⬛'):1147176472998596678,
     }
     global messageidforcolorrole
-    if payload.message_id==messageidforcolorrole:
+    if payload.message_id==1147303010372948048:
         member=payload.member
         channel=client.get_channel(payload.channel_id)
         message=await channel.fetch_message(payload.message_id)
