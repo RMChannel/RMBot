@@ -229,6 +229,7 @@ async def refreshmember(interaction):
     guild=interaction.guild
     channel=guild.get_channel(1147658085201092688)
     await channel.edit(name="Membri: "+str(guild.member_count))
+    await interaction.response.send_message(content="Numero di membri aggiornato", ephemeral=True)
 
 
 #ROLE CONTROLLER
