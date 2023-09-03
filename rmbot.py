@@ -230,6 +230,11 @@ async def refreshmember(interaction):
     guild=interaction.guild
     channel=guild.get_channel(1147658085201092688)
     await channel.edit(name="Membri: "+str(guild.member_count))
+    memberonlinechannel=client.get_channel(1147658179069624331)
+    i=0
+    for member in guild.members:
+        if (member.status!=discord.Status.offline) and not(member.bot): i+=1
+    await memberonlinechannel.edit(name="Membri Online: "+str(i))
     await interaction.response.send_message(content="Numero di membri aggiornato", ephemeral=True)
 
 
