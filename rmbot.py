@@ -8,6 +8,7 @@ import pytz
 utc=pytz.UTC
 import typing
 import openpyxl
+import time
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -290,5 +291,15 @@ async def on_ready():
     print(f'{client.user} si è connesso a Discord!')
     await tree.sync(guild=discord.Object(id=1119937562123980820))
     await client.change_presence(status=discord.Status.online, activity=attivita)
+    #INIZIO CICLO
+    guild=client.get_guild(1119937562123980820)
+    memberonlinechannel=client.get_channel(1147658179069624331)
+    while True:
+        i=0
+        for member in guild.members:
+            if (member.status!=discord.Status.offline) and not(member.bot): i+=1
+        await memberonlinechannel.edit(name="Membri Online: "+str(i))
+        time.sleep(300)
+        
 
 client.run(TOKEN)
