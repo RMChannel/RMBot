@@ -223,6 +223,14 @@ async def sendreactionrole(interaction, num:int):
     await interaction.response.send_message(content="ID messaggio reactioncolorrole impostato", ephemeral=True)
 
 
+#AGGIORNA I MEMBRI
+@tree.command(name="refreshmember", description="Aggiorna il numero di membri del server", guild=discord.Object(id=1119937562123980820))
+async def refreshmember(interaction):
+    guild=interaction.guild
+    channel=guild.get_channel(1147658085201092688)
+    await channel.edit(name="Membri: "+str(guild.member_count))
+
+
 #ROLE CONTROLLER
 @client.event
 async def on_raw_reaction_add(payload):
@@ -255,6 +263,9 @@ async def on_raw_reaction_add(payload):
 async def on_member_join(member):
     embed=discord.Embed(title="**Benvenuto**", description=member.mention+"!!!", color=0x002aff)
     embed.set_thumbnail(url=member.display_avatar.url)
+    guild=client.get_guild(1119937562123980820)
+    memberchannel=client.get_channel(1147658085201092688)
+    await memberchannel.edit(name="Membri: "+str(guild.member_count))
     channel=client.get_channel(1120014820473839636)
     await channel.send(embed=embed)
     await member.add_roles(member.guild.get_role(1119938660662517812))
@@ -263,7 +274,10 @@ async def on_member_join(member):
 @client.event
 async def on_member_remove(member):
     embed=discord.Embed(title="**Addio**", description=member.mention, color=0x002aff)
+    guild=client.get_guild(1119937562123980820)
     embed.set_thumbnail(url=member.display_avatar.url)
+    memberchannel=client.get_channel(1147658085201092688)
+    await memberchannel.edit(name="Membri: "+str(guild.member_count))
     channel=client.get_channel(1137508111117193227)
     await channel.send(embed=embed)
     print(member.name+" è uscito dal server")
