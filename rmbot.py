@@ -199,8 +199,9 @@ async def sondaggio(interaction, channel:discord.TextChannel, title:str, emojia:
 
 
 
-#RUOLI DEI COLORI
+#RUOLI PULSANTE
 messageidforcolorrole=0
+messageidforstaff=0
 #INVIO MESSAGGIO RECATION ROLE
 @tree.command(name="sendreactioncolorrole", description="Invia un messaggio con i reaction role dei colori", guild=discord.Object(id=1119937562123980820))
 @app_commands.describe(channel="Canale dove inviare i reaction roles")
@@ -226,17 +227,8 @@ async def sendreactionrole(interaction, num:int):
 
 
 #AGGIORNA I MEMBRI
-@tree.command(name="refreshmember", description="Aggiorna il numero di membri del server", guild=discord.Object(id=1119937562123980820))
-async def refreshmember(interaction):
-    guild=interaction.guild
-    channel=guild.get_channel(1147658085201092688)
-    await channel.edit(name="Membri: "+str(guild.member_count))
-    memberonlinechannel=client.get_channel(1147658179069624331)
-    i=0
-    for member in guild.members:
-        if (member.status!=discord.Status.offline) and not(member.bot): i+=1
-    await memberonlinechannel.edit(name="Membri Online: "+str(i))
-    await interaction.response.send_message(content="Numero di membri aggiornato", ephemeral=True)
+
+
 
 
 #ROLE CONTROLLER
@@ -250,7 +242,7 @@ async def on_raw_reaction_add(payload):
         discord.PartialEmoji(name='⬛'):1147176472998596678,
     }
     global messageidforcolorrole
-    if payload.message_id==1147303010372948048:
+    if payload.message_id==messageidforcolorrole:
         member=payload.member
         channel=client.get_channel(payload.channel_id)
         message=await channel.fetch_message(payload.message_id)
@@ -262,6 +254,33 @@ async def on_raw_reaction_add(payload):
                 await member.add_roles(member.guild.get_role(emojirole[payload.emoji]))
             else: await member.remove_roles(member.guild.get_role(emojirole[payload.emoji]))
             await message.remove_reaction(payload.emoji, member)
+    elif payload.message_id==messageidforstaff:
+        channel=client.get_channel(payload.channel_id)
+        guild=client.get_guild(1119937562123980820)
+        category = client.get_channel(1179169810249158717)
+        message=await channel.fetch_message(payload.message_id)
+        overwrites = {
+        guild.default_role: discord.PermissionOverwrite(read_messages=False),
+        guild.me: discord.PermissionOverwrite(read_messages=True),
+        guild.get_member(payload.member.id): discord.PermissionOverwrite(read_messages=True)
+        }
+        channel= await category.create_text_channel(name="Canale staff"+payload.member.name,overwrites=overwrites)
+        embed=discord.Embed(title="**Info Curriculum**", color=0x002aff,description="Ecco una rapida guida sulle info da dare:\nNome utente:\nEtà:\nEsperienze precedenti:\nCosa sai fare e cosa non sai fare riguardo al ruolo di admin:\n")
+        await channel.send(embed=embed)
+        await message.remove_reaction(payload.emoji, payload.member)
+
+
+#SLASH COMMAND PER EVENTO STAFF
+@tree.command(name="sendstaff", guild=discord.Object(id=1119937562123980820))
+@app_commands.describe(channel="Canale di invio messaggio")
+async def testfunction(interaction, channel:discord.TextChannel):
+    embed=discord.Embed(title="**Ruoli Staff aperti!!!**", color=0x002aff, description="Da ora è disponibile il ruolo Admin, la quale avrà il compito di controllare il server, accertarsi il rispetto delle regole e aiuto su manuntenzione e gestione generale del server.\nSe siete interessati cliccate il tasto qui sotto per inviare una vostra domanda di assunzione!!!")
+    message=await channel.send(embed=embed)
+    await interaction.response.send_message(content="Messaggio creato", ephemeral=True)
+    await message.add_reaction(str("📨"))
+    global messageidforstaff
+    messageidforstaff=message.id
+
 
 
 
@@ -290,20 +309,6 @@ async def on_member_remove(member):
     await channel.send(embed=embed)
     print(member.name+" è uscito dal server")
 
-
-@tasks.loop(minutes=5)
-async def memberonlineupdate():
-    guild=client.get_guild(1119937562123980820)
-    memberonlinechannel=client.get_channel(1147658179069624331)
-    while True:
-        i=0
-        members=guild.members
-        for member in members:
-            if (member.status!=discord.Status.offline) and not(member.bot): i+=1
-        await memberonlinechannel.edit(name="Membri Online: "+str(i))
-
-
-
 #CONFERMA CONNESSIONE BOT
 @client.event
 async def on_ready():
@@ -311,7 +316,6 @@ async def on_ready():
     print(f'{client.user} si è connesso a Discord!')
     await tree.sync(guild=discord.Object(id=1119937562123980820))
     await client.change_presence(status=discord.Status.online, activity=attivita)
-    memberonlineupdate.start()
         
 
 client.run(TOKEN)
